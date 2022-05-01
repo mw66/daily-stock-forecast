@@ -78,7 +78,7 @@ param_dict = {
                         "gaussianprocessclassifier__random_state": [0]
                         },
     "Decision Tree":{"pca__n_components": [None],
-                     'decisiontreeclassifier__min_samples_split': range(2, 403, 10)
+                     'decisiontreeclassifier__min_samples_split': list(range(2, 403, 10))
                     },
     "Random Forest":{"pca__n_components": [None],
                      "randomforestclassifier__n_estimators": sp_randint(5, 50),

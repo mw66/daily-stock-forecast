@@ -67,11 +67,11 @@ def report(results, n_top=1):
     for i in range(1, n_top + 1):
         candidates = np.flatnonzero(results['rank_test_score'] == i)
         for candidate in candidates:
-            print("Model with rank: {0}".format(i))
-            print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+            print(("Model with rank: {0}".format(i)))
+            print(("Mean validation score: {0:.3f} (std: {1:.3f})".format(
                   results['mean_test_score'][candidate],
-                  results['std_test_score'][candidate]))
-            print("Parameters: {0}".format(results['params'][candidate]))
+                  results['std_test_score'][candidate])))
+            print(("Parameters: {0}".format(results['params'][candidate])))
             print("")
 
 def model(clf_name, features, labels):
@@ -107,7 +107,7 @@ def model(clf_name, features, labels):
     #report(random_search.cv_results_)
 
     elapsed_time = time.time() - start_time
-    print 'Optimizing %s on window %d took %d sec'%(clf_name, features.shape[1]/6, elapsed_time)
+    print('Optimizing %s on window %d took %d sec'%(clf_name, features.shape[1]/6, elapsed_time))
 
     return random_search
 
@@ -154,7 +154,7 @@ def model_scan(INPUT):
     y_test  = labels[split:]
 
     # Get a tuned version of each model
-    models = map(model, classifier_names, [X_train[:]]*len(classifier_names), [y_train[:]]*len(classifier_names))
+    models = list(map(model, classifier_names, [X_train[:]]*len(classifier_names), [y_train[:]]*len(classifier_names)))
 
     target_names = ['short', 'long']
     y_preds = [m.best_estimator_.predict(X_test) for m in models]
@@ -194,7 +194,7 @@ def model_scan(INPUT):
         temp_model.fit(features, labels)
         forecasts.append(temp_model.predict(inference_features)[0])
     elapsed_time = time.time() - start_time
-    print 'Refit and Forecast took %d s'%elapsed_time
+    print('Refit and Forecast took %d s'%elapsed_time)
 
     #print classifier_names[best_idx], window
     #report(models[best_idx].cv_results_)
@@ -214,15 +214,15 @@ def asset_to_report(INPUT):
     #possible_windows = np.linspace(1,max_window,21, dtype=int)
     # array([  1,   5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,
     #     65,  70,  75,  80,  85,  90,  95, 100])
-    possible_windows = np.linspace(1,max_window, 11, dtype=int)
+    possible_windows = np.linspace(5,max_window, 10, dtype=int)
     # array([  1,  10,  20,  30,  40,  50,  60,  70,  80,  90, 100])
 
     #possible_windows = [5,max_window] #testing
     
-    print possible_windows
+    print(possible_windows)
 
-    print 'Scanning %s for best window + hyperparams...'%symbol
-    results = list(map(model_scan, zip([hist]*len(possible_windows), possible_windows)))
+    print('Scanning %s for best window + hyperparams...'%symbol)
+    results = list(map(model_scan, list(zip([hist]*len(possible_windows), possible_windows))))
     
     models        = list(chain.from_iterable([item[0] for item in results]))
     names         = list(chain.from_iterable([item[1] for item in results]))
@@ -239,10 +239,10 @@ def asset_to_report(INPUT):
 
     elapsed_time = time.time() - start_time
 
-    print "Best Model: %s  window: %d  took: %0.1f minutes"%(names[best_idx], windows[best_idx], elapsed_time/60.)
+    print("Best Model: %s  window: %d  took: %0.1f minutes"%(names[best_idx], windows[best_idx], elapsed_time/60.))
     report(models[best_idx].cv_results_)
-    print print_reports[best_idx]
-    print '\n'
+    print(print_reports[best_idx])
+    print('\n')
 
     # create a json report for the site
     report_dict = {}
@@ -286,22 +286,22 @@ if __name__ == "__main__":
     ]
     symbols = [
         #'SH',
-        '^GSPC',
-        '^DJI',
-        '^IXIC',
-        '^TNX',
-        '^VIX'
+        'SPY',
+        'DIA',
+        'QQQ',
+        'TLT',
+        'UVXY'
     ]
 
     # Get 10 top stocks by mktcap
-    t_symbols, t_company_names = download_north_america_symbols(n=5)
+    t_symbols = t_company_names = ["TSLA", "NVDA", "AMD", "AMZN", "AAPL"]  # download_north_america_symbols(n=5)
     symbols                    = symbols + list(t_symbols)
     company_names              = company_names + list(t_company_names)
 
-    print symbols,company_names
+    print(symbols,company_names)
     
     # Get report for each symbol, heavy work per asset
-    results = list(map(asset_to_report, zip(symbols, company_names)))
+    results = list(map(asset_to_report, list(zip(symbols, company_names))))
 
     scores = [item['top_model']['f1_avg'] for item in results]
     sorted_idx = np.argsort(scores)[::-1]
@@ -316,4 +316,4 @@ if __name__ == "__main__":
     with open('../polymer-site/src/forecasts.json', 'w') as fp:
         json.dump(save_dict, fp, indent=4)
 
-    print json.dumps(save_dict, indent=4)
+    print(json.dumps(save_dict, indent=4))

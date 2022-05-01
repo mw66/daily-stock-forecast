@@ -29,12 +29,12 @@ def download_north_america_symbols(n=10):
     symbol_list        = list(symbol_list) #+ ['^GSPC', '^DJI', '^IXIC']
 
     elapsed_time       = time.time() - start_time
-    print("\nSymbol Universe Download from Nasdaq.com took %d seconds returned %d assets after mkt cap filter."%(elapsed_time, len(symbol_list)))
+    print(("\nSymbol Universe Download from Nasdaq.com took %d seconds returned %d assets after mkt cap filter."%(elapsed_time, len(symbol_list))))
 
     return symbol_list, company_name_list
 
 def download_historical(symbol):
-    print('\nDownloading\t\"%s\"'%symbol)
+    print(('\nDownloading\t\"%s\"'%symbol))
 
     # setup timespan per asset
     hist_len = 252*5
@@ -44,13 +44,13 @@ def download_historical(symbol):
     f = None
 
     try:
-        f = web.DataReader(symbol.strip(), 'yahoo', start, end).dropna(axis=0).astype(np.float32)
+        f = web.DataReader(symbol.strip(), 'stooq', start, end).dropna(axis=0).astype(np.float32)
         #f = par.get_data_yahoo(symbol.strip(), start, end).dropna(axis=0).astype(np.float32)
 
         if len(f.index) < 200:#hist_len*0.95: #required domain check
-            print "Failed to download enough history for: %s"%symbol, len(f.index), hist_len
+            print("Failed to download enough history for: %s"%symbol, len(f.index), hist_len)
             f = None
     except:
-        print "Failed to download: %s"%symbol
+        print("Failed to download: %s"%symbol)
 
     return f
